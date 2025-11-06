@@ -46,14 +46,12 @@ SELECT COUNT (DISTINCT color) FROM Table
 Ответ:4. Результат запроса будет 2
 
 Задание 2. Базы данных - ER
-## ER-диаграмма (Mermaid)
-
 ```mermaid
 erDiagram
-  CUSTOMERS ||--o{ ORDERS : places
-  TOWNS     ||--o{ ORDERS : delivers_to
-  ORDERS    ||--o{ ORDER_ITEMS : contains
-  ITEMS     ||--o{ ORDER_ITEMS : lists
+  CUSTOMERS ||--o{ ORDERS : оформляет            %% 1 клиент -> 0..N заказов
+  TOWNS     ||--o{ ORDERS : доставляется_в       %% 1 город -> 0..N заказов
+  ORDERS    ||--|{ ORDER_ITEMS : содержит        %% 1 заказ -> 1..N позиций
+  ITEMS     ||--o{ ORDER_ITEMS : присутствует_в  %% 1 товар -> 0..N позиций
 
   CUSTOMERS {
     BIGINT id PK
@@ -81,7 +79,7 @@ erDiagram
     BIGINT id PK
     TEXT   name
     BIGINT customer_id FK
-    BIGINT town_id   FK
+    BIGINT town_id FK
     NUMERIC price
     TEXT   status
     TIMESTAMP created_at
@@ -89,9 +87,9 @@ erDiagram
   }
 
   ORDER_ITEMS {
-    BIGINT order_id FK
-    BIGINT item_id  FK
-    INT    qty
-    NUMERIC unit_price
-    NUMERIC line_amount
+    BIGINT order_id PK, FK
+    BIGINT item_id  PK, FK
+    INT    qty                NN
+    NUMERIC unit_price        NN
+    NUMERIC line_amount       -- qty*unit_price (может быть GENERATED)
   }
