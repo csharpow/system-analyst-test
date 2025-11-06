@@ -97,7 +97,7 @@ erDiagram
 
 ## Задание 3. Интеграции
 
-### 1 Витрина (список товаров)
+### 3.1 Витрина (список товаров)
 **GET** `/api/v1/catalog/items?q=&category=&page=1&size=20&sort=-popularity&priceMin=&priceMax=&inStock=true`  
 **200 OK**
 ```json
@@ -121,7 +121,9 @@ erDiagram
   "size": 20,
   "total": 250
 }
-
+3.2 Карточка товара
+GET /api/v1/items/{id}
+200 OK
 {
   "id": 101,
   "sku": "FOX-TOY-RD",
@@ -137,9 +139,15 @@ erDiagram
   "category": ["Игрушки", "Мягкие"],
   "delivery": { "available": true, "estimateDays": "2-4" }
 }
+404 Not Found
 { "error": "NOT_FOUND", "message": "Товар не найден" }
+3.3 Добавление товара в корзину
+Корзина определяется по cookie cartId или заголовку X-Cart-Id. Если идентификатор не передан, сервер создаёт новый.
+POST /api/v1/cart/items
+Body
 
 { "itemId": 101, "qty": 2 }
+201 Created
 {
   "cartId": "c-abc123",
   "items": [
@@ -165,11 +173,11 @@ erDiagram
   },
   "updatedAt": "2025-11-06T15:00:00Z"
 }
+Ошибки
 { "error": "BAD_REQUEST",  "message": "qty должен быть > 0" }
 { "error": "NOT_FOUND",    "message": "Товар не найден" }
 { "error": "OUT_OF_STOCK", "message": "Недостаточно товара на складе (itemId=101)" }
-
-```mermaid
+3.4 Sequence UML (витрина → карточка → корзина)
 sequenceDiagram
     autonumber
     participant U as Пользователь
@@ -187,7 +195,7 @@ sequenceDiagram
     W-->>U: Показать детальное описание
 
     U->>W: Нажать "В корзину" (qty=2)
-    Note over W,API: Если cartId отсутствует — сервер создаёт новый
+    Note over W,API: Если cartId отсутствует — сервер создает новый
     W->>API: POST /api/v1/cart/items {itemId, qty}
     API-->>W: 201 {cartId, items[], totals}
     W-->>U: Обновить мини-корзину
@@ -196,4 +204,3 @@ sequenceDiagram
         API-->>W: 409 {error:"OUT_OF_STOCK", message:"Недостаточно товара"}
         W-->>U: Показать уведомление
     end
-```
