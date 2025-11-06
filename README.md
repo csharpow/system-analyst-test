@@ -93,6 +93,7 @@ erDiagram
     NUMERIC unit_price
     NUMERIC line_amount
   }
+```
 
 **Задание 3. Интеграции**
 
