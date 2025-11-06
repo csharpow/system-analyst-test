@@ -91,5 +91,5 @@ erDiagram
     BIGINT item_id  PK, FK
     INT    qty                NN
     NUMERIC unit_price        NN
-    NUMERIC line_amount       -- qty*unit_price
+    NUMERIC line_amount     
   }
