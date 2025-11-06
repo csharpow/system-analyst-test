@@ -45,7 +45,7 @@ SELECT COUNT (DISTINCT color) FROM Table
 
 Ответ:4. Результат запроса будет 2
 
-Задание 2. Базы данных - ER
+**Задание 2. Базы данных - ER**
 ```mermaid
 erDiagram
   CUSTOMERS ||--o{ ORDERS : оформляет
@@ -93,4 +93,115 @@ erDiagram
     NUMERIC unit_price
     NUMERIC line_amount
   }
+
+**Задание 3. Интеграции**
+
+1. Витрина (список товаров)
+GET /api/v1/catalog/items?q=&category=&page=1&size=20&sort=-popularity&priceMin=&priceMax=&inStock=true
+200 OK
+
+{
+  "items": [
+    {
+      "id": 101,
+      "sku": "FOX-TOY-RD",
+      "title": "Игрушка Red Fox",
+      "short": "Мягкая лиса 20 см",
+      "price": 1990.00,
+      "currency": "RUB",
+      "thumbUrl": "/img/items/101-thumb.jpg",
+      "rating": 4.7,
+      "reviewCount": 126,
+      "inStock": true,
+      "badges": ["hit", "new"]
+    }
+  ],
+  "page": 1,
+  "size": 20,
+  "total": 250
+}
+
+2. Карточка товара
+GET /api/v1/items/{id}
+200 OK
+
+{
+  "id": 101,
+  "sku": "FOX-TOY-RD",
+  "title": "Игрушка Red Fox",
+  "description": "Плюшевая лиса, гипоаллергенный наполнитель. Мягкая и приятная на ощуп. Длинна игрушки: 20 см.",
+  "images": ["/img/items/101-1.jpg", "/img/items/101-2.jpg"],
+  "price": 1990.00,
+  "listPrice": 2290.00,
+  "currency": "RUB",
+  "inStock": true,
+  "stock": 42,
+  "attributes": { "color": "red", "size": "20cm", "material": "plush" },
+  "category": ["Игрушки", "Мягкие"],
+  "delivery": { "available": true, "estimateDays": "2-4" }
+}
+
+404 NOT FOUND
+{ "error": "NOT_FOUND", "message": "Товар не найден" }
+
+POST /api/v1/cart/items
+Body
+{ "itemId": 101, "qty": 2 }
+201 Created
+{
+  "cartId": "c-abc123",
+  "items": [
+    {
+      "lineId": "l-1",
+      "itemId": 101,
+      "title": "Игрушка Red Fox",
+      "sku": "FOX-TOY-RD",
+      "qty": 2,
+      "unitPrice": 1990.00,
+      "lineAmount": 3980.00,
+      "currency": "RUB",
+      "thumbUrl": "/img/items/101-thumb.jpg"
+    }
+  ],
+  "totals": {
+    "items": 3980.00,
+    "discounts": 0.00,
+    "shipping": 0.00,
+    "tax": 0.00,
+    "total": 3980.00,
+    "currency": "RUB"
+  },
+  "updatedAt": "2025-11-06T15:00:00Z"
+}
+
+{ "error": "BAD_REQUEST", "message": "кол-во должно быть > 0" }
+{ "error": "NOT_FOUND", "message": "Товар не найден" }
+{ "error": "OUT_OF_STOCK", "message": "Недостаточно товара на складе (itemId=101)" }
+
+sequenceDiagram
+    autonumber
+    participant U as Пользователь
+    participant W as Веб/Мобильное приложение
+    participant API as Backend API
+
+    U->>W: Открыть витрину
+    W->>API: GET /api/v1/catalog/items?page=1&size=20&q=
+    API-->>W: 200 {items[], page, size, total}
+    W-->>U: Показать список товаров
+
+    U->>W: Открыть карточку товара
+    W->>API: GET /api/v1/items/{id}
+    API-->>W: 200 {id, title, images[], price, ...}
+    W-->>U: Показать детальное описание
+
+    U->>W: Нажать "В корзину" (qty=2)
+    Note over W,API: Если cartId отсутствует — сервер создаёт новый
+    W->>API: POST /api/v1/cart/items {itemId, qty}
+    API-->>W: 201 {cartId, items[], totals}
+    W-->>U: Обновить мини-корзину
+
+    alt Нет остатков
+        API-->>W: 409 {error:"OUT_OF_STOCK", message:"Недостаточно товара"}
+        W-->>U: Показать уведомление
+    end
 
