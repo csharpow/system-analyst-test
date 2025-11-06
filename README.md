@@ -98,6 +98,7 @@ erDiagram
 ## Задание 3. Интеграции
 
 ### 3.1 Витрина (список товаров)
+
 **GET** `/api/v1/catalog/items?q=&category=&page=1&size=20&sort=-popularity&priceMin=&priceMax=&inStock=true`  
 **200 OK**
 ```json
@@ -108,7 +109,7 @@ erDiagram
       "sku": "FOX-TOY-RD",
       "title": "Игрушка Red Fox",
       "short": "Мягкая лиса 20 см",
-      "price": 1990.00,
+      "price": 1990.0,
       "currency": "RUB",
       "thumbUrl": "/img/items/101-thumb.jpg",
       "rating": 4.7,
@@ -121,17 +122,30 @@ erDiagram
   "size": 20,
   "total": 250
 }
-3.2 Карточка товара
-GET /api/v1/items/{id}
-200 OK
+```
+
+**Параметры:**
+- `q` — строка поиска; `category` — слаг/ID категории.
+- `page` (≥1), `size` (1–100).
+- `sort` — поле с префиксом `-` для убывания (например, `-popularity`, `price`).
+- `priceMin`, `priceMax` — фильтр по цене.
+- `inStock` — `true|false`.
+
+---
+
+### 3.2 Карточка товара
+
+**GET** `/api/v1/items/{id}`  
+**200 OK**
+```json
 {
   "id": 101,
   "sku": "FOX-TOY-RD",
   "title": "Игрушка Red Fox",
   "description": "Плюшевая лиса, гипоаллергенный наполнитель. Мягкая и приятная на ощупь. Длина игрушки: 20 см.",
   "images": ["/img/items/101-1.jpg", "/img/items/101-2.jpg"],
-  "price": 1990.00,
-  "listPrice": 2290.00,
+  "price": 1990.0,
+  "listPrice": 2290.0,
   "currency": "RUB",
   "inStock": true,
   "stock": 42,
@@ -139,15 +153,29 @@ GET /api/v1/items/{id}
   "category": ["Игрушки", "Мягкие"],
   "delivery": { "available": true, "estimateDays": "2-4" }
 }
-404 Not Found
-{ "error": "NOT_FOUND", "message": "Товар не найден" }
-3.3 Добавление товара в корзину
-Корзина определяется по cookie cartId или заголовку X-Cart-Id. Если идентификатор не передан, сервер создаёт новый.
-POST /api/v1/cart/items
-Body
+```
 
+**Ошибки**  
+`404 Not Found`
+```json
+{ "error": "NOT_FOUND", "message": "Товар не найден" }
+```
+
+---
+
+### 3.3 Добавление товара в корзину
+
+**POST** `/api/v1/cart/items`  
+**Headers (рекомендуется):**  
+- `Idempotency-Key: <uuid>` — защита от повторного добавления при ретраях.
+
+**Body**
+```json
 { "itemId": 101, "qty": 2 }
-201 Created
+```
+
+**201 Created**
+```json
 {
   "cartId": "c-abc123",
   "items": [
@@ -157,27 +185,46 @@ Body
       "title": "Игрушка Red Fox",
       "sku": "FOX-TOY-RD",
       "qty": 2,
-      "unitPrice": 1990.00,
-      "lineAmount": 3980.00,
+      "unitPrice": 1990.0,
+      "lineAmount": 3980.0,
       "currency": "RUB",
       "thumbUrl": "/img/items/101-thumb.jpg"
     }
   ],
   "totals": {
-    "items": 3980.00,
-    "discounts": 0.00,
-    "shipping": 0.00,
-    "tax": 0.00,
-    "total": 3980.00,
+    "items": 3980.0,
+    "discounts": 0.0,
+    "shipping": 0.0,
+    "tax": 0.0,
+    "total": 3980.0,
     "currency": "RUB"
   },
   "updatedAt": "2025-11-06T15:00:00Z"
 }
-Ошибки
-{ "error": "BAD_REQUEST",  "message": "qty должен быть > 0" }
-{ "error": "NOT_FOUND",    "message": "Товар не найден" }
+```
+
+**Ошибки**
+
+`400 Bad Request`
+```json
+{ "error": "BAD_REQUEST", "message": "qty должен быть > 0" }
+```
+
+`404 Not Found`
+```json
+{ "error": "NOT_FOUND", "message": "Товар не найден" }
+```
+
+`409 Conflict`
+```json
 { "error": "OUT_OF_STOCK", "message": "Недостаточно товара на складе (itemId=101)" }
-3.4 Sequence UML (витрина → карточка → корзина)
+```
+
+---
+
+### 3.4 Sequence UML (витрина → карточка → корзина)
+
+```mermaid
 sequenceDiagram
     autonumber
     participant U as Пользователь
@@ -195,7 +242,7 @@ sequenceDiagram
     W-->>U: Показать детальное описание
 
     U->>W: Нажать "В корзину" (qty=2)
-    Note over W,API: Если cartId отсутствует — сервер создает новый
+    Note over W,API: Если cartId отсутствует — сервер создает новый (Set-Cookie)
     W->>API: POST /api/v1/cart/items {itemId, qty}
     API-->>W: 201 {cartId, items[], totals}
     W-->>U: Обновить мини-корзину
@@ -204,3 +251,4 @@ sequenceDiagram
         API-->>W: 409 {error:"OUT_OF_STOCK", message:"Недостаточно товара"}
         W-->>U: Показать уведомление
     end
+```
