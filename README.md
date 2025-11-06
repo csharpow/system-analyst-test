@@ -95,12 +95,12 @@ erDiagram
   }
 ```
 
-**Задание 3. Интеграции**
+## Задание 3. Интеграции
 
-1. Витрина (список товаров)
-GET /api/v1/catalog/items?q=&category=&page=1&size=20&sort=-popularity&priceMin=&priceMax=&inStock=true
-200 OK
-
+### 1 Витрина (список товаров)
+**GET** `/api/v1/catalog/items?q=&category=&page=1&size=20&sort=-popularity&priceMin=&priceMax=&inStock=true`  
+**200 OK**
+```json
 {
   "items": [
     {
@@ -122,15 +122,11 @@ GET /api/v1/catalog/items?q=&category=&page=1&size=20&sort=-popularity&priceMin=
   "total": 250
 }
 
-2. Карточка товара
-GET /api/v1/items/{id}
-200 OK
-
 {
   "id": 101,
   "sku": "FOX-TOY-RD",
   "title": "Игрушка Red Fox",
-  "description": "Плюшевая лиса, гипоаллергенный наполнитель. Мягкая и приятная на ощуп. Длинна игрушки: 20 см.",
+  "description": "Плюшевая лиса, гипоаллергенный наполнитель. Мягкая и приятная на ощупь. Длина игрушки: 20 см.",
   "images": ["/img/items/101-1.jpg", "/img/items/101-2.jpg"],
   "price": 1990.00,
   "listPrice": 2290.00,
@@ -141,14 +137,9 @@ GET /api/v1/items/{id}
   "category": ["Игрушки", "Мягкие"],
   "delivery": { "available": true, "estimateDays": "2-4" }
 }
-
-404 NOT FOUND
 { "error": "NOT_FOUND", "message": "Товар не найден" }
 
-POST /api/v1/cart/items
-Body
 { "itemId": 101, "qty": 2 }
-201 Created
 {
   "cartId": "c-abc123",
   "items": [
@@ -174,11 +165,11 @@ Body
   },
   "updatedAt": "2025-11-06T15:00:00Z"
 }
-
-{ "error": "BAD_REQUEST", "message": "кол-во должно быть > 0" }
-{ "error": "NOT_FOUND", "message": "Товар не найден" }
+{ "error": "BAD_REQUEST",  "message": "qty должен быть > 0" }
+{ "error": "NOT_FOUND",    "message": "Товар не найден" }
 { "error": "OUT_OF_STOCK", "message": "Недостаточно товара на складе (itemId=101)" }
 
+```mermaid
 sequenceDiagram
     autonumber
     participant U as Пользователь
@@ -205,4 +196,4 @@ sequenceDiagram
         API-->>W: 409 {error:"OUT_OF_STOCK", message:"Недостаточно товара"}
         W-->>U: Показать уведомление
     end
-
+```
