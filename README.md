@@ -77,20 +77,20 @@ erDiagram
 
   ORDERS {
     BIGINT id PK
-    TEXT   name NN
-    BIGINT customer_id FK NN (NO ACTION)
-    BIGINT town_id     FK NN (NO ACTION)
-    NUMERIC price NN
-    TEXT   status NN
+    TEXT   name
+    BIGINT customer_id FK
+    BIGINT town_id     FK
+    NUMERIC price
+    TEXT   status
     TIMESTAMP created_at
     TIMESTAMP updated_at
   }
 
   ORDER_ITEMS {
-    BIGINT order_id PK, FK NN (ON DELETE CASCADE)
-    BIGINT item_id  PK, FK NN (NO ACTION)
-    INT    qty NN
-    NUMERIC unit_price NN
+    BIGINT order_id PK,FK
+    BIGINT item_id  PK,FK
+    INT    qty
+    NUMERIC unit_price
     NUMERIC line_amount
   }
 
