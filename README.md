@@ -48,10 +48,10 @@ SELECT COUNT (DISTINCT color) FROM Table
 Задание 2. Базы данных - ER
 ```mermaid
 erDiagram
-  CUSTOMERS ||--o{ ORDERS : оформляет            %% 1 клиент -> 0..N заказов
-  TOWNS     ||--o{ ORDERS : доставляется_в       %% 1 город -> 0..N заказов
-  ORDERS    ||--|{ ORDER_ITEMS : содержит        %% 1 заказ -> 1..N позиций
-  ITEMS     ||--o{ ORDER_ITEMS : присутствует_в  %% 1 товар -> 0..N позиций
+  CUSTOMERS ||--o{ ORDERS : оформляет            
+  TOWNS     ||--o{ ORDERS : доставляется_в       
+  ORDERS    ||--|{ ORDER_ITEMS : содержит       
+  ITEMS     ||--o{ ORDER_ITEMS : присутствует_в  
 
   CUSTOMERS {
     BIGINT id PK
@@ -91,5 +91,5 @@ erDiagram
     BIGINT item_id  PK, FK
     INT    qty                NN
     NUMERIC unit_price        NN
-    NUMERIC line_amount       -- qty*unit_price (может быть GENERATED)
+    NUMERIC line_amount       -- qty*unit_price
   }
